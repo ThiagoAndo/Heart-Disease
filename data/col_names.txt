@@ -1,0 +1,2 @@
+age sex chestpain blood_pressure serum_cholestrol blood_sugar electro_results heart_rate exer_induc_angina oldpeak slope_peak major_vessel thal condition
+thal sex chestpain exer_induc_angina slope_peak electro_results condition

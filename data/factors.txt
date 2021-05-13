@@ -1,0 +1,7 @@
+normal fixed_defect reversable_defect
+female male
+typical_angina atypical_angina non_anginal_pain asymptomatic
+no yes
+upsloping flat downsloping
+normal abnormality ventricular_hypertrophy
+no_disease disease
