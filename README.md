@@ -1,9 +1,9 @@
 Heart Disease Prediction: For a Healthier Life
 =======================
 
-<center>
+
 ![Confusion Matrix](images/heartbeat-heart-attack.jpg)
-</center>
+
 
 
 ## Introduction
