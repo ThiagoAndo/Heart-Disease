@@ -1,18 +1,18 @@
 Heart Disease Prediction: For a Healthier Life
 =======================
 
-# Introduction
+## Introduction
 
 Heart disease is one of the biggest causes of morbidity and mortality among the population of the world. As reported by World Health Organization (WHO), Heart Disease and Stroke are the world’s biggest killers and have remained the leading causes of death globally in the last 15 years. 
 
 Prediction of cardiovascular disease is regarded as one of the most important subjects in the section of clinical data analysis. The amount of data in the healthcare industry is huge. Data mining turns the large collection of raw healthcare data into information that can help to make informed decisions and predictions. Machine Learning can present remarkable features that simplify the identification of unseen patterns, eventually providing clinical insights that assist physicians in planning and providing care.  In this analysis, the presence of heart disease is predicted by employing Logistic regression and Tree Based Models.
 
 
-You can find the code used in this article in the [Github Repository](https://github.com/ThiagoAndo/Heart-Disease).
+You can find the detailed article in markdown format in the [RPubs](https://rpubs.com/AndoFreitas).
 
 --------------------------------------------------------------------------------------------
 
-# The Data
+## The Data
 
 The Heart Disease dataset has been taken from [Kaggle.](https://www.kaggle.com/cherngs/heart-disease-cleveland-uci) This data contains 76 attributes, but all published experiments refer to using a subset of 14 of them. It has a total number of 297 rows and 14 columns among which 137 have a heart disease. You can check the original dataset [here.](https://archive.ics.uci.edu/ml/datasets/Heart+Disease) 
 
