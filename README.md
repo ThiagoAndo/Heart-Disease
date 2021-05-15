@@ -1,6 +1,11 @@
 Heart Disease Prediction: For a Healthier Life
 =======================
 
+<center>
+![Confusion Matrix](images/heartbeat-heart-attack.jpg)
+</center>
+
+
 ## Introduction
 
 Heart disease is one of the biggest causes of morbidity and mortality among the population of the world. As reported by World Health Organization (WHO), Heart Disease and Stroke are the world’s biggest killers and have remained the leading causes of death globally in the last 15 years. 
