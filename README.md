@@ -2,10 +2,10 @@ Heart Disease Prediction: For a Healthier Life
 =======================
 
 
-**Logistic Regression performed with 90% of accuracy on its predictions**
+### **Logistic Regression performed with 90% of accuracy**
 
 
-![Confusion Matrix](images/heartbeat-heart-attack.jpg)
+![](images/heartbeat-heart-attack.jpg)
 
 
 
