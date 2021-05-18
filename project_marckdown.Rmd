@@ -18,7 +18,7 @@ output:
 
 ```{r setup, include = FALSE}
 # This will setup parameters for all chunks on the script
-# knitr::opts_chunk$set(fig.align = 'center', out.width = '80%', echo = TRUE)
+# knitr::opts_chunk$set(fig.align = 'center', out.width = '80%',, echo = TRUE)
 
 knitr::opts_chunk$set(fig.align = 'center', echo = TRUE)
 ```
