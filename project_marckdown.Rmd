@@ -69,10 +69,7 @@ library(gbm)           # Macchine Learning
 ```
 
 
-
-
-```{r, warning= FALSE}
-
+```{r}
 # Loading the data, variables names, and categorical descriptions
 
 files <- dir("data", full = T)
@@ -83,6 +80,11 @@ warning("FIRST YOU MUST CREATE A NEW R PROJEC THEN COPY THE FILES DOWNLOADED FRO
 
 
 names(files) <- gsub("\\.csv|\\.txt", "", dir("data"))
+```
+
+
+
+```{r, warning= FALSE}
 
 
 set_categorical_external <- function(){
