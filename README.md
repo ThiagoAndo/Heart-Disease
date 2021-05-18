@@ -2,8 +2,7 @@ Heart Disease Prediction: For a Healthier Life
 =======================
 
 
-### **Logistic Regression performed with 90% of accuracy**
-
+###[ **Logistic Regression performed with 90% of accuracy**](https://rpubs.com/AndoFreitas/771220).
 
 ![](images/heartbeat-heart-attack.jpg)
 
