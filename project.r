@@ -1,4 +1,9 @@
 
+#!!!!!!!!! TO REPRODUCE THIS CODE ON YOUR MACHINE, YOU MUST CREATE A NEW R PROJEC THEN COPY 
+#          THE FILES DOWNLOADED FROM GIT HUB AND PAST ALL INTO THE NEW PROJECT FOLDER. THEN 
+#          YOU OPEN YOUR NEW PROJECT. THEN  EVERYTHING WILL RUN SMOOTHLY.
+
+
 library(readr)         # read data
 
 library(stringi)       # string manipulation
@@ -29,7 +34,17 @@ library(gbm)           # Macchine Learning
 
 
 # Loading the data, variables names, and categorical descriptions
-files <- dir("data", full = T)
+
+
+# THIS FUNCTION READS THE DATA ONLY INSIDE A R PROJECT (YOU MUST CREATE ONE)
+
+files <- dir("data", full = T)  
+
+if(length(files)==0 ){
+warning("FIRST YOU MUST CREATE A NEW R PROJEC THEN COPY THE FILES DOWNLOADED FROM GIT HUB AND PAST ALL 
+INTO THE NEW PROJECT FOLDER") }
+
+
 names(files) <- gsub("\\.csv|\\.txt", "", dir("data"))
 
 
