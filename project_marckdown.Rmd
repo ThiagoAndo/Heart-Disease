@@ -1,54 +1,20 @@
 ---
-title: "Investment Report"
-author: "Thiago"
+title: "Heart Disease Prediction: For a Healthier Life"
+author: "Thiago Ando de Freitas"
 date: " Last edited `r format(Sys.Date(), '%d %B, %Y')`"
 output: 
  html_document:
+    css: "style.css" 
+    code_folding: hide
     toc: true
     toc_float:
       collapsed: false
       smooth_scroll: false
-    toc_depth: 2
+      toc_depth: 1
+      
    # toc_depth: 2
    # number_sections: true
 ---
-<style>
-#TOC {
-  color: #708090;
-  font-family: Calibri;
-  font-size: 16px; 
-  border-color: #708090;
-}
-h1.title {
-  color: #black;
-  background-color: #F5F5F5;
-  opacity: 0.6;
-  font-family: Calibri;
-  font-size: 20px;
-}
-h4.author {
-  color: black;
-  font-family: Calibri;
-  background-color: #F5F5F5;
-}
-h4.date {
-  color: black;  
-  font-family: Calibri;
-}
-body {
-  color: #708090;
-  font-family: Calibri;
-  background-color: #F5F5F5;
-}
-pre {
-  color: #708090;
-  background-color: #F8F8FF;
-}
-}
-
-# pre = code background, TOC = caixa de seleção
-</style>
- 
 
 ```{r setup, include = FALSE}
 # This will setup parameters for all chunks on the script
@@ -58,120 +24,695 @@ knitr::opts_chunk$set(fig.align = 'center', echo = TRUE)
 ```
 
 ```{r data, include = FALSE}
-library(readr)
-library(dplyr)
-library(ggplot2)
-library(knitr)
 
-investment_annual_summary <- read_csv("https://assets.datacamp.com/production/repositories/5756/datasets/d0251f26117bbcf0ea96ac276555b9003f4f7372/investment_annual_summary.csv")
+# Loading packages 
 
-investment_services_projects <- read_csv("https://assets.datacamp.com/production/repositories/5756/datasets/78b002735b6f620df7f2767e63b76aaca317bf8d/investment_services_projects.csv")
-```
+library(readr)         # read data
 
+library(stringi)       # string manipulation
 
-# Datasets 
+library(stringr)       # string manipulation
 
+library(data.table)    # data manipulation
 
-## Investment Annual Summary
-The `investment_annual_summary` dataset provides a summary of the dollars in millions provided to each of the following regions for each fiscal year, from 2012 to 2018:
+library(dplyr)         # data manipulation
 
-- East Asia and the Pacific      
-- Europe and Central Asia        
-- Latin America and the Caribbean
-- Middle East and North Africa   
-- South Asia                     
-- Sub-Saharan Afric
+library(ggplot2)       # visualization
 
+library(ggthemes)      # visualization
 
-1. East Asia and the Pacific      
-2. Europe and Central Asia        
-3. Latin America and the Caribbean
-4. Middle East and North Africa   
-5. South Asia                     
-6. Sub-Saharan Africa
+library(caret)         # confusin matrix
 
+library(visdat)        # visualization of missing data 
 
+library(skimr)         # data summary
 
-## Investment Annual Summary
+library(pROC)          # model validation
 
-The `investment_annual_summary` dataset provides a summary of the dollars in millions provided to each region for each fiscal year, from 2012 to 2018.
-```{r investment-annual-summary, out.width = '85%',fig.cap = 'Figure 1.1 The Investment Annual Summary for each region for 2012 to 2018.'}
-ggplot(investment_annual_summary, aes(x = fiscal_year, y = dollars_in_millions, color = region)) +
-  geom_line() +
-  labs(
-    title = "Investment Annual Summary",
-    x = "Fiscal Year",
-    y = "Dollars in Millions"
-  )
+library(randomForest)  # Macchine Learning
+
+library(gbm)           # Macchine Learning
 ```
 
 
 
-```{r tables}
 
-investment_annual_summary %>%
-     count(region, wt = dollars_in_millions) -> investment_region_summary
+```{r, warning= FALSE}
 
-kable(investment_region_summary, col.names = c("Region", "Dollars in Millions"), align = "cc", caption = "Table 1.1 The total investment summary for each region for the 2012 to 2018 fiscal years.")
+# Loading the data, variables names, and categorical descriptions
+
+files <- dir("data", full = T)
+names(files) <- gsub("\\.csv|\\.txt", "", dir("data"))
+
+
+set_categorical_external <- function(){
+   
+   col_names <- str_split(stri_read_lines(files["col_names"])," ")
+   names(col_names) <- c("var_name", "fac_name")
+   level <- str_split(stri_read_lines(files["factors"])," ")
+   heart_data <- read.csv(files["heart_cleveland_upload"], col.names = col_names[["var_name"]])
+   heart_data2 <- as.data.table(heart_data)
+ 
+   for(i in seq_along(level)){
+      values <-  heart_data[ ,col_names[["fac_name"]][i] , drop = T] 
+      
+      heart_data2[, col_names[["fac_name"]][i] := factor(values,levels = sort(unique(values)),
+                             labels = level[[i]])][,"blood_sugar" :=
+                                                      ifelse(heart_data2$blood_sugar==1,
+                                                              TRUE, FALSE)]
+   }
+   return(as.data.frame(heart_data2))
+}
+
+heart_named <- set_categorical_external()
 ```
 
 
-## Investment Projects in Brazil
+<center>
+![Confusion Matrix](images/heartbeat-heart-attack.jpg)
+</center>
 
-The `investment_services_projects` dataset provides information about each investment project from 2012 to 2018. Information listed includes the project name, company name, sector, project status, and investment amounts.
-```{r brazil-investment-projects, out.width = '95%',fig.cap = 'Figure 1.2 The Investment Services Projects in Brazil from 2012 to 2018.'}
-brazil_investment_projects <- investment_services_projects %>%
-  filter(country == "Brazil") 
 
-ggplot(brazil_investment_projects, aes(x = date_disclosed, y = total_ifc_investment_as_approved_by_board_million_usd, color = status)) +
-  geom_point() +
-  labs(
-    title = "Investment Services Projects",
-    x = "Date Disclosed",
-    y = "Total IFC Investment in Dollars in Millions"
-  )
+
+#Introduction
+
+Heart disease is one of the biggest causes of morbidity and mortality among the population of the world. As reported by World Health Organization (WHO), Heart Disease and Stroke are the world’s biggest killers and have remained the leading causes of death globally in the last 15 years. 
+
+Prediction of cardiovascular disease is regarded as one of the most important subjects in the section of clinical data analysis. The amount of data in the healthcare industry is huge. Data mining turns the large collection of raw healthcare data into information that can help to make informed decisions and predictions. Machine Learning can present remarkable features that simplify the identification of unseen patterns, eventually providing clinical insights that assist physicians in planning and providing care.  In this analysis, the presence of heart disease is predicted by employing Logistic regression and Tree Based Models.
+
+
+You can find the code used in this article in the [Github Repository](https://github.com/ThiagoAndo/Heart-Disease). **Right-click on the link and choose (open in a New Window).**
+
+--------------------------------------------------------------------------------------------
+
+#The Data
+
+The Heart Disease dataset has been taken from [Kaggle.](https://www.kaggle.com/cherngs/heart-disease-cleveland-uci) This data contains 76 attributes, but all published experiments refer to using a subset of 14 of them. It has a total number of 297 rows and 14 columns among which 137 have a heart disease. You can check the original dataset [here.](https://archive.ics.uci.edu/ml/datasets/Heart+Disease) 
+
+
+* age: age in years
+* sex: sex (1 = male; 0 = female)
+* cp: chest pain type
+    * Value 0: typical angina
+    * Value 1: atypical angina
+    * Value 2: non-anginal pain
+    * Value 3: asymptomatic
+* trestbps: resting blood pressure (in mm Hg on admission to the hospital)
+* chol: serum cholestoral in mg/dl
+* fbs: (fasting blood sugar > 120 mg/dl) (1 = true; 0 = false)
+* restecg: resting electrocardiographic results
+    * Value 0: normal
+    * Value 1: having ST-T wave abnormality (T wave inversions and/or ST elevation or depression of > 0.05 mV)
+    * Value 2: showing probable or definite left ventricular hypertrophy by Estes' criteria
+* thalach: maximum heart rate achieved
+* exang: exercise induced angina (1 = yes; 0 = no)
+* oldpeak = ST depression induced by exercise relative to rest
+* slope: the slope of the peak exercise ST segment
+    * Value 0: upsloping
+    * Value 1: flat
+    * Value 2: downsloping
+* ca: number of major vessels (0-3) colored by flourosopy
+* thal: 0 = normal; 1 = fixed defect; 2 = reversable defect
+and the label
+* condition: 0 = no disease, 1 = disease
+</br></br>
+
+
+
+# Data cleaning and pre-processing
+
+There were no duplicate entries in the and no missing values the table below gives a summary of these:
+```{r}
+paste0("There are ",sum(duplicated(heart_named)), " duplicate observations") 
+
+# The skim  providing a strong set of summary statistics that are generated for a variety of different data types.
+skim(heart_named)
 ```
-## Investment Projects in Brazil in 2018
+
+
+
+</br></br>
 
 
 
 
 
+# Problem Statements
+Performing analysis of Heart Disease dataset both visually and statistically to obtain important observations that can be used for inference. Build a model having high accuracy and precision to predict whether a person has heart disease with greater confidence.
 
 
-```{r brazil-projects-2018, out.width = '95%',fig.cap = 'Figure 1.3 The Investment Services Projects in Brazil in 2018.'}
-brazil_investment_projects_2018 <- investment_services_projects %>%
-  filter(country == "Brazil",
-         date_disclosed >= "2017-07-01",
-         date_disclosed <= "2018-06-30") 
+</br></br>
 
-ggplot(brazil_investment_projects_2018, aes(x = date_disclosed, y = total_ifc_investment_as_approved_by_board_million_usd, color = status)) +
-  geom_point() +
-  labs(
-    title = "Investment Services Projects in Brazil in 2018",
-    x = "Date Disclosed",
-    y = "Total IFC Investment in Dollars in Millions"
-  ) 
+
+
+#Data Analysis
+
+
+
+```{r, fig.cap = 'Figure 1'}
+ggplot(heart_named, aes(x=condition, fill=condition)) + 
+   geom_bar(stat="count") +
+   geom_text(aes(label = ..count..), stat = "count", vjust = 1.5, colour = "white",
+             fontface = "bold",size = 7)+
+   theme_minimal() +
+   scale_fill_manual(values =c("#808080", "#B3B6B7"))+
+   ggtitle("Count of Presence and Absence of Heart Disease") +
+   xlab("Heart Disease") +
+   ylab("Count")+
+   theme(
+      axis.text.y = element_blank(),
+      axis.text.x =  element_text(size = 15, color="black") ,
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      axis.ticks = element_blank(),
+      plot.title = element_text(size = 17),
+                                
+      legend.position = "none") 
+
+```
+ 
+ However, this data set is small, it is well distributed between the outcomes. We can check on the bar chart that roughly 46% of the outcome tested positive for heart disease. This will help the precision of the algorithm in predicting heart disease.  
+ 
+</br>
+
+```{r,fig.cap = 'Figure 2'}
+  
+ggplot(heart_named, aes(sex, fill = sex))+
+   geom_bar(stat="count") +
+   geom_text(aes(label = ..count..), stat = "count",  vjust = 1.5, colour = "white",
+             fontface = "bold",size = 7)+
+   facet_grid(cols = vars(condition),labeller = label_both)+
+   theme_minimal()  +
+   scale_fill_manual(values = c("#808080", "#B3B6B7"))+
+   ggtitle("Heart Diseases Frequency for Sexes")+
+   theme(
+      axis.text.y = element_blank(),
+      axis.text.x =  element_text(size = 12, color = "black") ,
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      axis.ticks = element_blank(),
+      strip.text.x = element_text(size = 14),
+      plot.title = element_text(size = 17),
+      legend.position = "none") 
+```
+
+Here, we can verify that more than to third of the data set is composed of males and that the incidence of heart disease in males is far greater than it is in females.
+</br>
+
+```{r, fig.cap = 'Figure 3'}
+                      
+ggplot(heart_named,aes(age, fill= condition)) +
+   geom_histogram(aes(y=..density..),breaks=seq(29, 80, by=1), color="grey17") +
+   facet_wrap(~condition, ncol=1,scale="fixed") +
+   theme_clean()+
+   scale_fill_manual(values =c("#808080", "#B3B6B7"))+
+   scale_x_continuous(breaks=seq(29, 80, by=5))+
+   xlab("Age") +
+   ylab("Density") +
+   ggtitle("Age Histogram")+
+   theme(
+         plot.title = element_text(size = 17),
+         strip.text.x = element_text(size = 14),
+         legend.position = "none") 
+```
+
+We see that age plays an important role in increasing the risk of having heart disease. The incidences of positive (disease) starts to increase at the age of 53, peaking at the age of 57, then it starts decreasing until the age of 62. Most people who are suffering are of the age of 57, followed by 56.
+
+</br>
+
+```{r, fig.cap = 'Figure 4'}
+
+
+ggplot(heart_named,aes(blood_pressure, fill=condition)) +
+   geom_histogram(aes(y=..density..),binwidth = 1, color="grey17") +
+   geom_density(alpha=.1, fill="black")+
+   facet_wrap(~condition, ncol=1,scale="fixed") +
+   scale_x_continuous(breaks=seq(94.0, 200.0, by=10))+
+   theme_clean()   +
+   scale_fill_manual(values = c("#808080", "#B3B6B7")) +
+   xlab("Blood Pressure") +
+   ylab("Density") +
+   ggtitle("Resting Blood Pressure (in mm Hg on admission to the hospital)")+
+   theme(
+      plot.title = element_text(size = 15),
+      strip.text.x = element_text(size = 14),
+      legend.position = "none") 
+```
+
+Although, it is well known that, over time, hypertension can damage the arteries that feed the heart. The distribution between the two groups appears to be quite similar. It does not indicate any pattern that suggests that the group with the disease has higher blood pressure. Except, for the incidence of some outliers.
+
+</br>
+```{r, fig.cap = 'Figure 5'}
+
+ggplot(heart_named, aes(y = heart_rate, fill =condition))+
+   geom_boxplot()+
+   scale_fill_manual(values = c("#808080", "#B3B6B7")) +
+   scale_y_continuous(breaks=seq(70.0, 200.0, by=10))+
+   theme_minimal()+
+   ggtitle("Distributions Max Heart Rate achieved")+
+   theme(
+      plot.title = element_text(size = 15)) 
+```
+
+
+```{r, fig.cap = 'Figure 5.1'}
+
+ggplot(heart_named, aes( heart_rate, fill =condition))+
+   geom_density(alpha= .5)+
+   scale_fill_manual(values = c("#404040", "#B3B6B7")) +
+   theme_minimal()+
+   ggtitle("Distributions Max Heart Rate achieved")+
+   theme(
+      plot.title = element_text(size = 15)) 
+
+```
+We can see from Figures 5 and 5.1 that healthier people have a higher heart rate in comparison with people who have heart disease. Although the distribution of both groups is normal, we can identify that the spread of the distribution for the people with a detected problem is more spread with a lower mean.
+
+</br>
+
+```{r, fig.cap = 'Figure 6'}
+
+ggplot(heart_named, aes(y = oldpeak, fill =condition))+
+   geom_boxplot()+
+   scale_fill_manual(values = c("#808080", "#B3B6B7")) +
+   theme_minimal()+
+   ggtitle("Distribution of ST Depression Induced by Exercise Relative to Rest")  
+
 ```
 
 
 
-## Investment Projects in Brazil in 2018
 
-```{r brazil-investment-projects-2018, out.width = '95%'}
-brazil_investment_projects_2018 <- investment_services_projects %>%
-  filter(country == "Brazil",
-         date_disclosed >= "2017-07-01",
-         date_disclosed <= "2018-06-30") 
 
-brazil_investment_projects_2018
+```{r, fig.cap = 'Figure 6.1'}
 
-brazil_investment_projects_2018_total <- brazil_investment_projects_2018 %>%
-  summarize(sum_total_investment = sum(total_ifc_investment_as_approved_by_board_million_usd, na.rm = TRUE)) 
+ggplot(heart_named, aes( oldpeak, fill =condition))+
+   geom_density(alpha= .5)+
+   scale_fill_manual(values = c("#404040", "#B3B6B7")) +
+   theme_minimal()+
+   ggtitle("Distribution of ST Depression Induced by Exercise Relative to Rest")
 
-brazil_investment_projects_2018_total
 ```
 
-The total investment amount for all projects in Brazil in the 2018 fiscal year was `r brazil_investment_projects_2018_total` million dollars.
+We can identify in Figures 6 and 6.1 an opposite pattern from Figures 5 and 5.1. Here healthier people have a lower oldpeak, in comparison with people who have heart disease. The spread of the distribution remains more spread for the people with a detected problem.
+
+</br>
+
+```{r, fig.cap = 'Figure 7'}
+
+ggplot(heart_named,aes(chestpain, fill=condition)) +
+   geom_bar(stat="count") +
+   geom_text(aes(label = ..count..), stat = "count", vjust = -.5, colour = "black",
+             fontface = "bold" )+
+   facet_grid(cols = vars(condition), labeller = label_both)+
+   theme_minimal()  +
+   scale_fill_manual(values = c("#808080", "#B3B6B7"))+
+   ggtitle("Bar Chart of Chest Pain Type for Condition")+
+   theme(
+      axis.text.y = element_blank(),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      axis.ticks = element_blank(),
+      axis.text.x=element_text(angle=35, hjust=1, vjust=1.2, color="black"),
+      plot.title = element_text(size = 17),
+      strip.text.x = element_text(size = 14),
+      legend.position = "none")
+```
+The predominant chest pain experienced by the group with a heart problem is asymptomatic. While in the other group. It is non-anginal pain. 
+
+</br>
+```{r, fig.cap = 'Figure 8'}
+
+ggplot(heart_named,aes(thal, fill=condition)) +
+   geom_bar(stat="count") +
+   geom_text(aes(label = ..count..), stat = "count", vjust = -.2, colour = "black",
+             fontface = "bold", size = 4)+
+   facet_grid(cols = vars(condition), labeller = label_both)+
+   theme_minimal()  +
+   scale_fill_manual(values = c("#808080", "#B3B6B7"))+
+   ggtitle("Blood Disorder Thalassemia")+
+   theme(
+      axis.text.y = element_blank(),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      axis.ticks = element_blank(),
+      axis.text.x=element_text(angle=35, hjust=1, vjust=1.1, color="black"),
+      plot.title = element_text(size = 17),
+      strip.text.x = element_text(size = 14),
+      legend.position = "none")
+```
+We can see that only roughly 21% of the people with a healthy heart do not have abnormality caused by Thalassemia. However, in the other group, almost 73% present abnormality.
+
+</br>
 
 
+```{r, message=FALSE,, fig.cap = 'Figure 9'}
+
+ggplot(heart_named, aes(age, blood_pressure, color = condition))+ 
+   geom_point(size = 4, alpha= 0.6)+
+   scale_color_manual(values = c("#A0A0A0", "black"))+
+   scale_fill_manual(values = c("#808080", "#B3B6B7"))+
+   facet_grid(cols = vars(sex))+
+   geom_smooth(method = "lm",se =FALSE )+
+   theme_minimal()  +
+   ggtitle("Relationship Between Age and Blood Pressure")+
+   theme(
+      axis.text.x=element_text( color="black"),
+      plot.title = element_text(size = 17),
+      strip.text.x = element_text(size = 14))
+
+```
+We can see that age and blood pressure are positively correlated. As we saw in figure 3 the spread of blood pressure remains quite similar for men. However, by separating the groups by gender, we are able to verify that blood pressure changes for women. Women with heart disease tend to have higher blood pressure.
+
+</br>
+
+
+```{r, message=FALSE, fig.cap = 'Figure 10'}
+
+ggplot(heart_named, aes(age, heart_rate, color = condition))+
+   geom_point(size = 4, alpha= 0.6)+
+   scale_color_manual(values = c("#A0A0A0", "black"))+
+   scale_fill_manual(values = c("#black", "#black"))+
+   facet_grid(cols = vars(sex))+
+   geom_smooth(method = "lm",se =FALSE )+
+   theme_minimal()  +
+   ggtitle("Relationship Between Age and Blood Pressure")+
+   theme(
+      axis.text.x=element_text( color="black"),
+      plot.title = element_text(size = 17),
+      strip.text.x = element_text(size = 14))
+
+```
+We can see that age and heart rate are negatively correlated except for the group of women with heart disease that is positively correlated. As we get older, our hearts tend to decrease heart rate. Though, for women with abnormalities in the heart, it tends to increase.
+</br>
+
+
+
+<br><br>
+<br><br>
+
+# Machine Learning
+
+Algorithm                       | Description
+--------------------------------|-------------
+Random Forest                   | Decision tree  
+Logistic Regression             | Binary predictor
+Gradient Boosting Machine (GBM) | Decision tree 
+
+<br>
+
+##Evaluation Metrics 
+
+###Confusion Matrix
+The confusion matrix displays the correctly predicted as well as incorrectly predicted values by a classifier.
+The sum of TP and TN, from the confusion matrix, is the number of correctly classified entries by the classifier.
+<br><br>
+
+
+<center,  width = 100%>
+![Confusion Matrix](images/Confusion+Matrix.png)
+</center>
+<br><br>
+
+
+###ROC Curve
+
+ROC Curves summarizes the trade-off between the true positive rate and the false positive rate for the predictive model using different probability thresholds.
+
+<br><br>
+
+#Applying algorithms
+
+###Splitting Data
+
+ The sample will be done using 75% of the observations for training and 
+25% for testing the model. The variables were selected based on the data analyses.
+
+```{r}
+heart_data_2 <- heart_named %>%
+   select(chestpain,thal,major_vessel,heart_rate,oldpeak,blood_pressure,
+          condition,age,sex)
+
+set.seed(754)
+
+n <- nrow(heart_data_2)
+
+n_train <- round(0.74 * n)
+
+train_indices <- sample(1:n, n_train)
+
+train <- heart_data_2[train_indices, ]
+
+test  <- heart_data_2[-train_indices, ]
+
+```
+The train dataset is composed of: `r nrow(train)` rows and the test dataset is composed of: `r nrow(test)` rows.
+
+
+
+### Random Forest
+
+```{r, results="hide"}
+
+#================= TURNING A RANDOM FOREST VIA MTRY 
+# This function is a specific utility to tune the mtry parameter based on OOB error, which is # helpful when you want a quick & easy way to tune your model.
+
+set.seed(754)  
+model <-  tuneRF(x = subset(train, select = -condition),
+                y = train$condition,
+                ntreeTry = 500,
+                doBest = TRUE,
+                plot= FALSE,
+                trace = FALSE)
+
+
+# Generate predictions on the test set
+test$target_pred <- predict(object = model, 
+                            newdata = test)
+ 
+```
+
+<br>
+
+Confusion matrix of predictions from the training set (Random Forest):
+```{r}
+model$confusion[c(1,2),c(1,2)]
+```
+<br>
+Accuracy for Random Forest for training set = `r round((1 - (sum(model$confusion[c(2,3)]) / sum(model$confusion[c(1,2,3,4)]))),2)*100`%
+
+<br>
+<br>
+
+Confusion matrix of predictions from the test set(Random Forest):
+```{r}
+f <- table(test$condition,test$target_pred)
+t.df<-as.data.frame(f)
+
+
+ggplot(data = t.df, aes(x = Var1, y = Var2, label=Freq)) +
+   geom_tile(aes(fill = Freq)) +
+   scale_fill_gradient(low="#E0E0E0" , high= "#808080") +
+   theme_minimal() +
+   xlab("Actual Heart Disease") +
+   ylab("Predicted Heart Disease") +
+   geom_text(size=8) +
+   ggtitle("Random Forest")
+```
+
+```{r, include = FALSE}
+cm <- confusionMatrix(data = as.factor(test$target_pred),         
+                reference = as.factor(test$condition))
+```
+
+<br>
+Accuracy for Random Forest for test set = `r round(cm$overall[1],2)*100`%
+<br>  
+<br>
+
+Plot of the ROC curve (Random Forest):
+```{r}
+ ROC <- suppressMessages(roc(ifelse(test$target_pred == "disease", 1,0),
+            ifelse(test$condition   == "disease", 1,0)))
+ 
+ # Plot the ROC curve
+ plot(ROC, col = "black")
+ 
+ # Calculate the area under the curve (AUC)
+ auc(ROC)
+```
+<br>
+<br>
+
+### Logistic Regression
+
+```{r}
+
+set.seed(754)
+
+# Train a Logistic Regression model
+model <- glm(condition ~ ., 
+             data = train, family = "binomial")
+
+
+# Generate predictions on the test set
+test$target_pred  <- predict(model ,newdata = test, 
+                             type = "response")
+
+test$target_pred <- ifelse(test$target_pred >= 0.504,"disease", "no_disease")
+
+```
+
+
+
+Confusion matrix of predictions from the test set(Logistic Regression):
+```{r}
+f <- table(test$condition,test$target_pred)
+t.df<-as.data.frame(f)
+
+
+ggplot(data = t.df, aes(x = Var1, y = Var2, label=Freq)) +
+   geom_tile(aes(fill = Freq)) +
+   scale_fill_gradient(low="#E0E0E0" , high= "#808080") +
+   theme_minimal() +
+   xlab("Actual Heart Disease") +
+   ylab("Predicted Heart Disease") +
+   geom_text(size=8) +
+   ggtitle("Logistic Regression")
+```
+
+```{r, include = FALSE}
+cm <- confusionMatrix(data = as.factor(test$target_pred),         
+                reference = as.factor(test$condition))
+```
+
+<br>
+Accuracy for Logistic Regression for test set = `r round(cm$overall[1],2)*100`%
+<br>  
+<br>
+
+Plot of the ROC curve (Logistic Regression):
+```{r}
+ ROC <- suppressMessages(roc(ifelse(test$target_pred == "disease", 1,0),
+            ifelse(test$condition   == "disease", 1,0)))
+ 
+ # Plot the ROC curve
+ plot(ROC, col = "black")
+ 
+ # Calculate the area under the curve (AUC)
+ auc(ROC)
+```
+<br>
+<br>
+
+
+
+
+
+```{r, include= FALSE}
+heart_data_2 <- heart_named %>%
+                select(chestpain,thal,major_vessel,heart_rate,oldpeak,blood_pressure,
+                       condition,age)
+
+set.seed(754)
+
+n <- nrow(heart_data_2)
+
+n_train <- round(0.75 * n)
+
+train_indices <- sample(1:n, n_train)
+
+train <- heart_data_2[train_indices, ]
+
+test <-  heart_data_2[-train_indices, ]
+```
+
+
+
+### Gradient Boosting Machine (GBM)
+
+
+```{r, message= FALSE}
+train$condition <- ifelse(train$condition == "disease", 1,0)
+
+# Train a 10000-tree GBM model
+set.seed(754)
+
+model <- gbm(formula = condition ~ ., 
+                    distribution = "bernoulli", 
+                    data = train,
+                    n.trees = 10000)
+
+
+
+#==================== EARLY STOPPING IN GBMs
+# Optimal ntree estimate based on OOB
+ntree_opt_oob <- gbm.perf(object = model, 
+                          method = "OOB", 
+                          oobag.curve = TRUE,
+                          plot.it = FALSE)
+
+
+
+test$condition<- ifelse(test$condition == "disease", 1,0)
+
+# Generate predictions on the test set (scale to response)
+test$target_pred <- predict(object  =  model, 
+                            newdata = test,
+                            n.trees = ntree_opt_oob,
+                            type = "response")
+
+
+test$target_pred <- ifelse(test$target_pred >= 0.504, "disease", "no_disease")
+
+test$condition   <- ifelse(test$condition == 1, "disease", "no_disease")
+
+
+```
+
+
+
+Confusion matrix of predictions from the test set(GBM):
+```{r}
+f <- table(test$condition,test$target_pred)
+t.df<-as.data.frame(f)
+
+
+ggplot(data = t.df, aes(x = Var1, y = Var2, label=Freq)) +
+   geom_tile(aes(fill = Freq)) +
+   scale_fill_gradient(low="#E0E0E0" , high= "#808080") +
+   theme_minimal() +
+   xlab("Actual Heart Disease") +
+   ylab("Predicted Heart Disease") +
+   geom_text(size=8) +
+   ggtitle("Gradient Boosting Machine")
+```
+
+```{r, include = FALSE}
+cm <- confusionMatrix(data = as.factor(test$target_pred),         
+                reference = as.factor(test$condition))
+```
+
+<br>
+Accuracy for (GBM) for test set = `r round(cm$overall[1],2)*100`%
+<br>  
+<br>
+
+Plot of the ROC curve (GBM):
+```{r}
+ ROC <- suppressMessages(roc(ifelse(test$target_pred == "disease", 1,0),
+            ifelse(test$condition   == "disease", 1,0)))
+ 
+ # Plot the ROC curve
+ plot(ROC, col = "black")
+ 
+ # Calculate the area under the curve (AUC)
+ auc(ROC)
+```
+<br>
+
+#Conclusion
+
+Among the algorithms applied to predict the incidence of heart disease, the Logistic Regression performed better with 90% of accuracy on its predictions.
+
+The number of people affected by heart  diseases is increasing day by day so it is very important to have a method to detect even the subtle patterns which point out a problem in the heart. With the help of machine learning models we can identify who suffers from these diseases from the patterns on the data. This way increasing the odds for possible early treatment and healthier life.

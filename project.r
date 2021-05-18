@@ -1,56 +1,37 @@
 
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+library(readr)         # read data
 
-# These are some packages that probably you have to install on your machine to run the 
-# following code 
+library(stringi)       # string manipulation
 
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+library(stringr)       # string manipulation
 
-library(readr)  # read_delim()
+library(data.table)    # data manipulation
 
-library(stringi)# stri_read_lines()
+library(dplyr)         # data manipulation
 
-library(stringr)# str_split()
+library(ggplot2)       # visualization
 
-library(dplyr)
+library(ggthemes)      # visualization
 
-library(ggplot2)
+library(caret)         # confusin matrix
 
-library(ggthemes)
+library(visdat)        # visualization of missing data 
 
-library(pROC)
+library(skimr)         # data summary
 
-library(visdat) #vis_miss()
+library(pROC)          # model validation
 
-library(skimr) #skim()
+library(randomForest)  # Macchine Learning
 
-library(data.table) #as.data.table(a)
+library(gbm)           # Macchine Learning
 
-library(randomForest)
 
-library(caret)
 
-library(gbm)
 
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-# Bro, I made  set_categorical_external to read and set the right categorical
-# variables in the respectves places I also put the variables and factor names on two external
-# files caled col_names.txt and factors.txt to make the code more compact these two files
-# have to be in the same folder of prokecttt.r.
-
-# I wrote a function called internal_function that is in (Halit\outhers\internal_function.txt)
-# this function has the factors name on it and you can replace set_categorical_external 
-# with it, if you prefer.
-
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# Loading the data, variables names, and categorical descriptions
 files <- dir("data", full = T)
-
 names(files) <- gsub("\\.csv|\\.txt", "", dir("data"))
 
-heart_data <- read.csv(files["heart_cleveland_upload"])
 
 set_categorical_external <- function(){
    
@@ -66,7 +47,7 @@ set_categorical_external <- function(){
       heart_data2[, col_names[["fac_name"]][i] := factor(values,levels = sort(unique(values)),
                              labels = level[[i]])][,"blood_sugar" :=
                                                       ifelse(heart_data2$blood_sugar==1,
-                                                             TRUE, FALSE)]
+                                                              TRUE, FALSE)]
    }
    return(as.data.frame(heart_data2))
 }
@@ -76,16 +57,6 @@ heart_named <- set_categorical_external()
 
 #=================================== EDA ====================================================
 
-
-
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-# Here I made Exploratory Data analysis as it is required on the statement of the project
-# run the plots and check out the patterns on the dataset that it revels 
-
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 glimpse(heart_named)
 
@@ -98,7 +69,7 @@ heart_named %>%
 
 
 # Visualize all of the missingness in the `riskfactors`  dataset
-visdat::vis_miss(heart_named)
+vis_miss(heart_named)
 
 
 # This skim function shows a summary of all variables in the data set 
@@ -289,34 +260,87 @@ ggplot(heart_named, aes(major_vessel, fill = condition))+
       strip.text.x = element_text(size = 14),
       legend.position = "none")
 
-# CONCLUSION ================================================================================
-# the patterns that are visible in this data set are people with chest pain called asymptomatic
-# tend to have heart disease also that males are the majority with hart disease and age are 
-# correlated with heart disease.
 
-# it is possible to see strange phenomena in this data set people has an abnormal heart rate
-# also, people how have heart disease are more likely to practice exercise and have a low 
-# heart hate it may happen  they began to exercise after being diagnosed with heart 
-# disease because they are in majority of people with a fixed defect and reversible defect.
 
-# The variables in this data set that might be well explanatory variables are age, sex, 
-# chest pain, blood pressure.
-#============================================================================================
+
+ggplot(heart_data_2, aes(age, blood_pressure, color = condition))+ 
+   geom_point(size = 4, alpha= 0.6)+
+   scale_color_manual(values = c("#A0A0A0", "black"))+
+   scale_fill_manual(values = c("#808080", "#B3B6B7"))+
+   facet_grid(cols = vars(sex))+
+   geom_smooth(method = "lm",se =FALSE )+
+   theme_minimal()  +
+   ggtitle("Relationship Between Age and Blood Pressure")+
+   theme(
+      axis.text.x=element_text( color="black"),
+      plot.title = element_text(size = 17),
+      strip.text.x = element_text(size = 14))
+
+
+
+
+
+ggplot(heart_data_2, aes(age, heart_rate, color = condition))+
+   geom_point(size = 4, alpha= 0.6)+
+   scale_color_manual(values = c("#A0A0A0", "black"))+
+   scale_fill_manual(values = c("#black", "#black"))+
+   facet_grid(cols = vars(sex))+
+   geom_smooth(method = "lm",se =FALSE )+
+   theme_minimal()  +
+   ggtitle("Relationship Between Age and Blood Pressure")+
+   theme(
+      axis.text.x=element_text( color="black"),
+      plot.title = element_text(size = 17),
+      strip.text.x = element_text(size = 14))
+
+
+
+ggplot(heart_data_2, aes(heart_rate , blood_pressure, color = condition))+
+   geom_point(size = 4, alpha= 0.6)+
+   scale_color_manual(values = c("#A0A0A0", "black"))+
+   scale_fill_manual(values = c("#black", "#black"))+
+   facet_grid(cols = vars(sex))+
+   geom_smooth(method = "lm",se =FALSE )+
+   theme_minimal()  +
+   ggtitle("Relationship Between Age and Blood Pressure")+
+   theme(
+      axis.text.x=element_text( color="black"),
+      plot.title = element_text(size = 17),
+      strip.text.x = element_text(size = 14))
+
+
+
+
+ggplot(heart_data_2, aes(heart_rate , oldpeak, color = condition))+
+   geom_point(size = 4, alpha= 0.6)+
+   scale_color_manual(values = c("#A0A0A0", "black"))+
+   scale_fill_manual(values = c("#black", "#black"))+
+   facet_grid(cols = vars(sex))+
+   geom_smooth(method = "lm",se =FALSE )+
+   theme_minimal()  +
+   ggtitle("Relationship Between Age and Blood Pressure")+
+   theme(
+      axis.text.x=element_text( color="black"),
+      plot.title = element_text(size = 17),
+      strip.text.x = element_text(size = 14))
+
+
+
+
+
 
 #============================================================================================
 heart_data_2 <- heart_named %>%
    select(chestpain,thal,major_vessel,heart_rate,oldpeak,blood_pressure,
           condition,age,sex)
 
-set.seed(754)
-
-glimpse(heart_data_2)
 
 
 n <- nrow(heart_data_2)
 
 n_train <- round(0.74 * n)
 
+set.seed(754)
 train_indices <- sample(1:n, n_train)
 
 train <- heart_data_2[train_indices, ]
@@ -325,20 +349,6 @@ test  <- heart_data_2[-train_indices, ]
 
 #============================================================================================
 
-#===========================================================================================
-
-
-# In this exercise, you will use the n this exercise, you will use the randomForest::tuneRF()
-# to tune mtry (by training several models). This function is a specific utility to tune the
-# mtry parameter based on OOB error, which is helpful when you want a quick & easy way to 
-# tune your model. A more generic way of tuning Random Forest parameters will be presented 
-# in the following exercise.
-
-# Execute the tuning process
-
-# If you just want to return the best RF model (rather than results)
-# you can set `doBest = TRUE` in `tuneRF()` to return the best RF model
-# instead of a set performance matrix.
 
 set.seed(754)  
 model <- tuneRF(x = subset(train, select = -condition),
@@ -347,13 +357,21 @@ model <- tuneRF(x = subset(train, select = -condition),
                 doBest = TRUE)
 
 
+model$confusion[c(1,2),c(1,2)]
+
+
+round((1 - (sum(model$confusion[c(2,3)]) / sum(model$confusion[c(1,2,3,4)]))),2)
+
+
+set.seed(754)
 test$target_pred <- predict(object = model, 
                             newdata = test)
 
 
 confusionMatrix(data = as.factor(test$target_pred),         
                 reference = as.factor(test$condition))
- 
+
+cm$overall[1]
  
  ROC <- roc(ifelse(test$target_pred == "disease", 1,0),
             ifelse(test$condition   == "disease", 1,0))
@@ -399,30 +417,25 @@ ggplot(rankImportance, aes(x = reorder(variables, importance),
 
 #============================================================================================
 
-set.seed(754)
 
+set.seed(754)
+# Train a Logistic Regression model
 model <- glm(condition ~ ., 
              data = train, family = "binomial")
 
+
+set.seed(754)
+# Generate predictions on the test set
 test$target_pred  <- predict(model ,newdata = test, 
                              type = "response")
 
 test$target_pred <- ifelse(test$target_pred >= 0.504,"disease", "no_disease")
 
 
-confusionMatrix(data = factor(test$target_pred, levels = c("no_disease","disease")),         
+confusionMatrix(data = as.factor(test$target_pred),         
                 reference = as.factor(test$condition))
 
 
-ROC <- roc(ifelse(test$target_pred == "disease", 1,0), 
-           ifelse(test$condition   == "disease", 1,0))
-
-
-# Plot the ROC curve
-plot(ROC, col = "red")
-
-# Calculate the area under the curve (AUC)
-auc(ROC)
 
 f <- table(test$condition,test$target_pred)
 t.df<-as.data.frame(f)
@@ -437,41 +450,40 @@ ggplot(data = t.df, aes(x = Var1, y = Var2, label=Freq)) +
    geom_text(size=8) +
    ggtitle("Logistic Regression")
 
+
+
+
+ROC <- suppressMessages(roc(ifelse(test$target_pred == "disease", 1,0),
+                            ifelse(test$condition   == "disease", 1,0)))
+
+# Plot the ROC curve
+plot(ROC, col = "black")
+
+# Calculate the area under the curve (AUC)
+auc(ROC)
+
+
 #============================================================================================
+
 heart_data_2 <- heart_named %>%
                 select(chestpain,thal,major_vessel,heart_rate,oldpeak,blood_pressure,
                        condition,age)
 
-set.seed(754)
 
 n <- nrow(heart_data_2)
 
 n_train <- round(0.75 * n)
 
+set.seed(754)
 train_indices <- sample(1:n, n_train)
 
 train <- heart_data_2[train_indices, ]
 
 test <-  heart_data_2[-train_indices, ]
 
-# Here you wil use the gbm() function to train a GBM classifier to predict loan default. You
-# Will train a 10,000 tree GB< ib tge credut_train dataset, which is preloaded into your 
-# workspace.
-# Using such a large number of trees (10,000) is probably not optimal for a GBM model, but 
-# we will build more trees than we need and then select the optimal number of trees based 
-# on early performance-based stopping. The best GBM model will likely contain fewer trees 
-# than we started with.
-
-# For binary classification, gbm() requires the response to be encoded as 0/1 (numeric), so
-# we will have to convert from a "no/yes" factor to a 0/1 numeric response column.
-
-# Also, the the gbm() function requires the user to specify a distribution argument. For a 
-# binary classification problem, you should set distribution = "bernoulli". The Bernoulli 
-# distribution models a binary response
-# Convert "yes" to 1, "no" to 0
-
 train$condition <- ifelse(train$condition == "disease", 1,0)
-#
+
+
 ## Train a 10000-tree GBM model
 set.seed(754)
 
@@ -482,37 +494,18 @@ model <- gbm(formula = condition ~ .,
 
 
 
+set.seed(754)
 #==================== EARLY STOPPING IN GBMs
 # Optimal ntree estimate based on OOB
 ntree_opt_oob <- gbm.perf(object = model, 
                           method = "OOB", 
-                          oobag.curve = TRUE)
+                          oobag.curve = TRUE,
+                          plot.it = FALSE)
 
 
 
 
 #==================== PREDICTING USING A (GBM) MODEL
-
-# The gbm package uses predict() function to generate predictions from a model, similar to 
-# many other machine learning packages in R. Whn you see a function like predict() packages
-# that works on many different types of input GBM moodel, , a RF model, a GLM model, etc), 
-# that indicates that predict() is an "alias" for a GBM-specific version of that function. 
-# The GBM specific version of that function is predict.gbm(), but for convenience sake, we 
-# can just use predict() (either works).
-
-# One thing that's particular to the predict.gbm() however, is that you need to specify the
-# number of trees used in the prediction. There is no default, so you have to specify this 
-# manually. For now, we can use the same number of trees that we specified when training 
-# the model, which is 10,000 (though this may not be the optimal number to use).
-
-# Another argument that you can specify is type, which is only relevant to Bernoulli and 
-# Poisson distributed outcomes. When using Bernoulli loss, the returned value is on the log
-# odds scale by default and for Poisson, it's on the log scale. If instead you specify type
-# = "response", then gbm converts the predicted values back to the same scale as the outcome
-# This will convert the predicted values into probabilities for Bernoulli and expected 
-# counts for Poisson.
-
-# Since we converted the training response col, let's also convert the test response col
 test$condition<- ifelse(test$condition == "disease", 1,0)
 
 set.seed(754)
@@ -531,8 +524,8 @@ test$condition   <- ifelse(test$condition == 1, "disease", "no_disease")
 confusionMatrix(data = factor(test$target_pred, levels = c("no_disease","disease")),         
                 reference = as.factor(test$condition))
 
-ROC <- roc(ifelse(test$target_pred == "disease", 1,0),
-           ifelse(test$condition   == "disease", 1,0))
+ROC <- suppressMessages(roc(ifelse(test$target_pred == "disease", 1,0),
+                            ifelse(test$condition   == "disease", 1,0)))
 
 # Plot the ROC curve
 plot(ROC, col = "red")
