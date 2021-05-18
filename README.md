@@ -13,7 +13,7 @@ Heart disease is one of the biggest causes of morbidity and mortality among the 
 Prediction of cardiovascular disease is regarded as one of the most important subjects in the section of clinical data analysis. The amount of data in the healthcare industry is huge. Data mining turns the large collection of raw healthcare data into information that can help to make informed decisions and predictions. Machine Learning can present remarkable features that simplify the identification of unseen patterns, eventually providing clinical insights that assist physicians in planning and providing care.  In this analysis, the presence of heart disease is predicted by employing Logistic regression and Tree Based Models.
 
 
-You can find the detailed article in markdown format in the [RPubs](https://rpubs.com/AndoFreitas).
+You can find the detailed article in markdown format in the [RPubs](https://rpubs.com/AndoFreitas/771220).
 
 --------------------------------------------------------------------------------------------
 
