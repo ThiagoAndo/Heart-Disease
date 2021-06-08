@@ -27,15 +27,14 @@ output:
 
 
 
-
-
-
 ```{r setup, include = FALSE}
 # This will setup parameters for all chunks on the script
 # knitr::opts_chunk$set(fig.align = 'center', out.width = '80%',, echo = TRUE)
 
 knitr::opts_chunk$set(fig.align = 'center', echo = TRUE)
 ```
+
+
 
 ```{r data, include = FALSE}
 
@@ -120,7 +119,7 @@ heart_named <- set_categorical_external()
 
 Heart disease is one of the biggest causes of morbidity and mortality among the population of the world. As reported by World Health Organization (WHO), Heart Disease and Stroke are the world’s biggest killers and have remained the leading causes of death globally in the last 15 years. 
 
-Prediction of cardiovascular disease is regarded as one of the most important subjects in the section of clinical data analysis. The amount of data in the healthcare industry is huge. Data mining turns the large collection of raw healthcare data into information that can help to make informed decisions and predictions. Machine Learning can present remarkable features that simplify the identification of unseen patterns, eventually providing clinical insights that assist physicians in planning and providing care.  In this analysis, the presence of heart disease is predicted by employing Logistic regression and Tree Based Models.
+Prediction of cardiovascular disease is regarded as one of the most important subjects in the section of clinical data analysis. The amount of data in the healthcare industry is huge. Data mining turns the large collection of raw healthcare data into information that can help to make informed decisions and predictions. Machine Learning can present remarkable features that simplify the identification of unseen patterns, eventually providing clinical insights that assist physicians in planning and providing care.  In this analysis, the presence of heart disease is predicted by employing Logistic regression and Tree-Based Models.
 
 
 You can find the code used in this article in the [Github Repository](https://github.com/ThiagoAndo/Heart-Disease). **Right-click on the link and choose (open in a New Window).**
@@ -163,9 +162,9 @@ and the label
 
 # Data cleaning and pre-processing
 
-There were no duplicate entries in the and no missing values the table below gives a summary of these:
+There were no duplicate entries and no missing values the table below gives a summary of these:
 ```{r}
-paste0("There are ",sum(duplicated(heart_named)), " duplicate observations") 
+paste0("There are ",sum(duplicated(heart_named)), " duplicated observations") 
 
 # The skim  providing a strong set of summary statistics that are generated for a variety of different data types.
 skim(heart_named)
@@ -180,7 +179,7 @@ skim(heart_named)
 
 
 # Problem Statements
-Performing analysis of Heart Disease dataset both visually and statistically to obtain important observations that can be used for inference. Build a model having high accuracy and precision to predict whether a person has heart disease with greater confidence.
+Perform dataset analysis of Heart Disease both visually and statistically to obtain important observations that can be used for inference. Fom this analysis, build a model having high accuracy and precision, to predict whether a person has heart disease with greater confidence.
 
 
 </br></br>
@@ -188,7 +187,6 @@ Performing analysis of Heart Disease dataset both visually and statistically to 
 
 
 #Data Analysis
-
 
 
 ```{r, fig.cap = 'Figure 1'}
@@ -213,7 +211,7 @@ ggplot(heart_named, aes(x=condition, fill=condition)) +
 
 ```
  
- However, this data set is small, it is well distributed between the outcomes. We can check on the bar chart that roughly 46% of the outcome tested positive for heart disease. This will help the precision of the algorithm in predicting heart disease.  
+ Althoug, this dataset is small, it is well distributed between the outcomes. We can check on the bar chart that roughly 46% of the outcome tested positive for heart disease. This will help the precision of the algorithm in predicting heart disease.  
  
 </br>
 
@@ -238,7 +236,7 @@ ggplot(heart_named, aes(sex, fill = sex))+
       legend.position = "none") 
 ```
 
-Here, we can verify that more than to third of the data set is composed of males and that the incidence of heart disease in males is far greater than it is in females.
+Here, we can verify that more than two thirds of the dataset is composed of males which infers and that the incidence of heart disease in males is far greater than it is in females.
 </br>
 
 ```{r, fig.cap = 'Figure 3'}
@@ -281,7 +279,7 @@ ggplot(heart_named,aes(blood_pressure, fill=condition)) +
       legend.position = "none") 
 ```
 
-Although, it is well known that, over time, hypertension can damage the arteries that feed the heart. The distribution between the two groups appears to be quite similar. It does not indicate any pattern that suggests that the group with the disease has higher blood pressure. Except, for the incidence of some outliers.
+Although, it is well known that, over time, hypertension can damage the arteries that feed the heart the distribution between the two groups appears to be quite similar. It does not indicate any pattern that suggests that the group with the disease has higher blood pressure. Except, for the incidence of some outliers.
 
 </br>
 ```{r, fig.cap = 'Figure 5'}
@@ -336,7 +334,7 @@ ggplot(heart_named, aes( oldpeak, fill =condition))+
 
 ```
 
-We can identify in Figures 6 and 6.1 an opposite pattern from Figures 5 and 5.1. Here healthier people have a lower oldpeak, in comparison with people who have heart disease. The spread of the distribution remains more spread for the people with a detected problem.
+We can identify in Figures 6 and 6.1 an opposite pattern from Figures 5 and 5.1. Here healthier people have a lower oldpeak, in comparison with people who have heart disease. The spread of the distribution remains more spread out for the people with a detected problem.
 
 </br>
 
@@ -383,7 +381,7 @@ ggplot(heart_named,aes(thal, fill=condition)) +
       strip.text.x = element_text(size = 14),
       legend.position = "none")
 ```
-We can see that only roughly 21% of the people with a healthy heart do not have abnormality caused by Thalassemia. However, in the other group, almost 73% present abnormality.
+Figure 7 shows that only about 21% of the people with a healthy heart do not have abnormality caused by Thalassemia. However, in the group with heart disease, almost 73% present the abnormality.
 
 </br>
 
@@ -404,7 +402,7 @@ ggplot(heart_named, aes(age, blood_pressure, color = condition))+
       strip.text.x = element_text(size = 14))
 
 ```
-We can see that age and blood pressure are positively correlated. As we saw in figure 3 the spread of blood pressure remains quite similar for men. However, by separating the groups by gender, we are able to verify that blood pressure changes for women. Women with heart disease tend to have higher blood pressure.
+We can see that age and blood pressure are positively correlated. As we saw in Figure 3.0 the spread of blood pressure remains quite similar for men and women. However, by separating the groups by gender, we are able to verify that blood pressure changes for women. Women with heart disease tend to have higher blood pressure.
 
 </br>
 
@@ -425,7 +423,7 @@ ggplot(heart_named, aes(age, heart_rate, color = condition))+
       strip.text.x = element_text(size = 14))
 
 ```
-We can see that age and heart rate are negatively correlated except for the group of women with heart disease that is positively correlated. As we get older, our hearts tend to decrease heart rate. Though, for women with abnormalities in the heart, it tends to increase.
+We can see that age and heart rate are negatively correlated in most groups. An exception is the case of women with heart disease, which is positively correlated. As we get older, our hearts tend to decrease heart rate. Though, for women with abnormalities in the heart, it tends to increase.
 </br>
 
 
@@ -737,4 +735,4 @@ Plot of the ROC curve (GBM):
 
 Among the algorithms applied to predict the incidence of heart disease, the Logistic Regression performed better with 90% of accuracy on its predictions.
 
-The number of people affected by heart  diseases is increasing day by day so it is very important to have a method to detect even the subtle patterns which point out a problem in the heart. With the help of machine learning models we can identify who suffers from these diseases from the patterns on the data. This way increasing the odds for possible early treatment and healthier life.
+The number of people affected by heart  diseases is increasing day by day so it is very important to have a method to detect even the subtle patterns which point out a problem in the heart. With the help of machine learning models we can identify who suffers from these diseases based on the patterns of the data which incerases the odds for possible early treatment and healthier life.
