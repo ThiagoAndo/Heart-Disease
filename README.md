@@ -50,3 +50,6 @@ The Heart Disease dataset has been taken from [Kaggle.](https://www.kaggle.com/c
 * thal: 0 = normal; 1 = fixed defect; 2 = reversable defect
 and the label
 * condition: 0 = no disease, 1 = disease
+</br></br>
+
+# You can find the detailed script in markdown format in the [RPubs](https://rpubs.com/AndoFreitas)
